@@ -20,7 +20,14 @@ function help(): void {
   Deno.exit(0);
 }
 
-function main(): void {
+async function fetchData(user: string, maxTimestamp?: number): Promise<string> {
+  const maxTimestampParam = maxTimestamp ? `&max_timestamp=${maxTimestamp}` : '';
+  const url = `https://curiouscat.live/api/v2.1/profile?username=${user}${maxTimestampParam}`
+  const res = await fetch(url);
+  return await res.json();
+}
+
+async function main(): Promise<void> {
   if (ARGS.help) help();
 
   const user = ARGS.user || prompt('Username: ');
@@ -33,6 +40,10 @@ function main(): void {
     console.log('Please provide a valid file path.');
     Deno.exit(1);
   }
+
+  const data = await fetchData(user)
+  console.log(data);
 }
 
-main();
+await main();
+Deno.exit(0);
