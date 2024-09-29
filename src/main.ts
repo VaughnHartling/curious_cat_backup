@@ -1,5 +1,7 @@
 import { parseArgs } from "jsr:@std/cli/parse-args";
 
+import { fetchData } from "./data_fetching.ts";
+
 const ARGS = parseArgs(Deno.args, {
   boolean: ['help'],
   string: ['user', 'file'],
@@ -20,13 +22,6 @@ function help(): void {
   Deno.exit(0);
 }
 
-async function fetchData(user: string, maxTimestamp?: number): Promise<string> {
-  const maxTimestampParam = maxTimestamp ? `&max_timestamp=${maxTimestamp}` : '';
-  const url = `https://curiouscat.live/api/v2.1/profile?username=${user}${maxTimestampParam}`
-  const res = await fetch(url);
-  return await res.json();
-}
-
 async function main(): Promise<void> {
   if (ARGS.help) help();
 
@@ -41,7 +36,7 @@ async function main(): Promise<void> {
     Deno.exit(1);
   }
 
-  const data = await fetchData(user)
+  const data = await (await fetchData(user)).posts.map(p => p.post);
   console.log(data);
 }
 
