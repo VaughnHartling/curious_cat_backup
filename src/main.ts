@@ -22,14 +22,15 @@ function help(): void {
 
 function main(): void {
   if (ARGS.help) help();
+
   const user = ARGS.user || prompt('Username: ');
   const file = ARGS.file || prompt('File location: ');
   if (!user) {
-    console.log('Please provide a valid user.');
+    console.log('Please provide a valid username.');
     Deno.exit(1);
   }
   if (!file) {
-    console.log('Please provide a valid file.');
+    console.log('Please provide a valid file path.');
     Deno.exit(1);
   }
 }
