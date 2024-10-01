@@ -11,6 +11,8 @@ const ARGS = parseArgs(Deno.args, {
   },
 });
 
+const POSTS: Post[] = [];
+
 function exit(code: number) {
   Deno.exit(code);
 }
@@ -30,21 +32,25 @@ function help(): void {
 async function processData(user: string, file: string, maxRequests = Infinity, maxTimestamp?: number) {
   if (maxRequests <= 0) {
     console.log('Max request limit reached');
-    exit(0);
+    return;
   }
   
   const data = await fetchData(user, maxTimestamp);
 
   if (!data.posts.length) {
     console.log('No more posts to process.');
-    exit(0);
+    return;
   }
 
-  console.log(data.posts.map(p => p.post.comment));
+  data.posts.forEach(p => POSTS.push(p.post));
   
   const nextTimeStamp = data.posts[data.posts.length - 1].post.timestamp - 1;
   await processData(user, file, maxRequests - 1, nextTimeStamp);
-} 
+}
+
+function getDate(post: Post): Date {
+  return new Date(post.timestamp * 1000);
+}
 
 async function main(): Promise<void> {
   if (ARGS.help) help();
@@ -60,8 +66,8 @@ async function main(): Promise<void> {
     exit(1);
   }
 
-
   await processData(user, file, ARGS.max_requests);
+  console.log(`Saved ${POSTS.length} posts from between ${getDate(POSTS[0])} and ${getDate(POSTS[POSTS.length - 1])}`);
 }
 
 await main();
