@@ -1,14 +1,19 @@
 import { parseArgs } from "jsr:@std/cli/parse-args";
 
-import { fetchData } from "./data_fetching.ts";
+import { fetchData, Post } from "./data_fetching.ts";
 
 const ARGS = parseArgs(Deno.args, {
   boolean: ['help'],
   string: ['user', 'file'],
+  number: ['max_requests'],
   alias: {
     'help': 'h',
-  }
+  },
 });
+
+function exit(code: number) {
+  Deno.exit(code);
+}
 
 function help(): void {
   console.log('Usage: curious_cat_backup: [OPTIONS...]');
@@ -19,8 +24,27 @@ function help(): void {
 
   console.log('\nOptional flags:');
   console.log(' -h, --help        Display list of options and exit program.');
-  Deno.exit(0);
+  exit(0);
 }
+
+async function processData(user: string, file: string, maxRequests = Infinity, maxTimestamp?: number) {
+  if (maxRequests <= 0) {
+    console.log('Max request limit reached');
+    exit(0);
+  }
+  
+  const data = await fetchData(user, maxTimestamp);
+
+  if (!data.posts.length) {
+    console.log('No more posts to process.');
+    exit(0);
+  }
+
+  console.log(data.posts.map(p => p.post.comment));
+  
+  const nextTimeStamp = data.posts[data.posts.length - 1].post.timestamp - 1;
+  await processData(user, file, maxRequests - 1, nextTimeStamp);
+} 
 
 async function main(): Promise<void> {
   if (ARGS.help) help();
@@ -29,16 +53,16 @@ async function main(): Promise<void> {
   const file = ARGS.file || prompt('File location: ');
   if (!user) {
     console.log('Please provide a valid username.');
-    Deno.exit(1);
+    exit(1);
   }
   if (!file) {
     console.log('Please provide a valid file path.');
-    Deno.exit(1);
+    exit(1);
   }
 
-  const data = await (await fetchData(user)).posts.map(p => p.post);
-  console.log(data);
+
+  await processData(user, file, ARGS.max_requests);
 }
 
 await main();
-Deno.exit(0);
+exit(0);
