@@ -73,6 +73,10 @@ async function main(): Promise<void> {
     console.log('Please provide a valid file path.');
     exit(1);
   }
+  if (!file.endsWith('.csv')) {
+    console.log('File path must end with .csv');
+    exit(1);
+  }
 
   await processData(user, file, ARGS.max_requests);
   console.log(`Saved ${POSTS.length} posts from between ${POSTS[0].date} and ${POSTS[POSTS.length - 1].date}`);
