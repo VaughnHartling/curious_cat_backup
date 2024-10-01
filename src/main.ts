@@ -1,6 +1,7 @@
 import { parseArgs } from "jsr:@std/cli/parse-args";
 
 import { fetchData, Post } from "./data_fetching.ts";
+import { Entry, toCSV, toEntries } from "./file_management.ts";
 
 const ARGS = parseArgs(Deno.args, {
   boolean: ['help'],
@@ -11,7 +12,7 @@ const ARGS = parseArgs(Deno.args, {
   },
 });
 
-const POSTS: Post[] = [];
+const POSTS: Entry[] = [];
 
 function exit(code: number) {
   Deno.exit(code);
@@ -42,7 +43,14 @@ async function processData(user: string, file: string, maxRequests = Infinity, m
     return;
   }
 
-  data.posts.forEach(p => POSTS.push(p.post));
+  data.posts.forEach(p => POSTS.push({
+    id: p.post.id,
+    question: p.post.comment,
+    answer: p.post.reply,
+    likes: p.post.likes,
+    date: getDate(p.post),
+    response_to: p.post.in_response_to?.id,
+  }));
   
   const nextTimeStamp = data.posts[data.posts.length - 1].post.timestamp - 1;
   await processData(user, file, maxRequests - 1, nextTimeStamp);
@@ -67,7 +75,10 @@ async function main(): Promise<void> {
   }
 
   await processData(user, file, ARGS.max_requests);
-  console.log(`Saved ${POSTS.length} posts from between ${getDate(POSTS[0])} and ${getDate(POSTS[POSTS.length - 1])}`);
+  console.log(`Saved ${POSTS.length} posts from between ${POSTS[0].date} and ${POSTS[POSTS.length - 1].date}`);
+  const text = toCSV(POSTS)
+  const data = toEntries(text);
+  console.log(data);
 }
 
 await main();
