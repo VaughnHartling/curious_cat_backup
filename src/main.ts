@@ -79,7 +79,9 @@ async function main(): Promise<void> {
   }
 
   const id = await getLastId(file);
-  await processData(user, file, ARGS.max_requests);
+  const lastPost = await getPostData(user, id);
+  const nextTimeStamp = lastPost ? lastPost.post.timestamp - 1 : undefined;
+  await processData(user, file, ARGS.max_requests, nextTimeStamp);
   await writeToFile(file, POSTS);
   console.log(`Saved ${POSTS.length} posts from between ${POSTS[POSTS.length - 1].date} and ${POSTS[0].date}`);
 }

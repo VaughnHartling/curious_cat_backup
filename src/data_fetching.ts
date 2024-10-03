@@ -24,7 +24,6 @@ export interface Post {
 export async function fetchData(user: string, maxTimestamp?: number): Promise<Data|undefined> {
     const maxTimestampParam = maxTimestamp ? `&max_timestamp=${maxTimestamp}` : '';
     const url = `https://curiouscat.live/api/v2.1/profile?username=${user}${maxTimestampParam}`
-    console.log(url)
     const res = await fetch(url);
     try {
         return await res.json();
@@ -34,8 +33,9 @@ export async function fetchData(user: string, maxTimestamp?: number): Promise<Da
     }
 }
 
-export async function getPostData(user: string, id: string | number): Promise<PostData|undefined> {
-    console.log('id', id)
+export async function getPostData(user: string, id?: string | number): Promise<PostData|undefined> {
+    if (!id) return undefined;
+    
     const url = `https://curiouscat.live/api/v2.1/profile/single_post?username=${user}&post_id=${id}`;
     console.log(url);
     const res = await fetch(url);

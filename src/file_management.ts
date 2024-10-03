@@ -33,6 +33,12 @@ export async function getLastId(file: string): Promise<number | string | undefin
 }
 
 export async function writeToFile(file: string, entries: Entry[]) {
-  let text = toCSV(entries);
+  let previousEntries: Entry[];
+  try {
+    previousEntries = toEntries(await Deno.readTextFile(file));
+  } catch (e) {
+    previousEntries = [];
+  }
+  let text = toCSV(previousEntries.concat(entries));
   await Deno.writeTextFile(file, text);
 }
