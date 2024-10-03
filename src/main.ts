@@ -12,7 +12,7 @@ const ARGS = parseArgs(Deno.args, {
   },
 });
 
-const POSTS: Entry[] = [];
+let POSTS: Entry[] = [];
 
 function exit(code: number) {
   Deno.exit(code);
@@ -60,6 +60,14 @@ function getDate(post: Post): Date {
   return new Date(post.timestamp * 1000);
 }
 
+async function wait(time: number) {
+  return new Promise<void>((res) => {
+    setTimeout(() => {
+      res();
+    }, time);
+  })
+}
+
 async function main(): Promise<void> {
   if (ARGS.help) help();
 
@@ -81,9 +89,20 @@ async function main(): Promise<void> {
   const id = await getLastId(file);
   const lastPost = await getPostData(user, id);
   const nextTimeStamp = lastPost ? lastPost.post.timestamp - 1 : undefined;
-  await processData(user, file, ARGS.max_requests, nextTimeStamp);
-  await writeToFile(file, POSTS);
-  console.log(`Saved ${POSTS.length} posts from between ${POSTS[POSTS.length - 1].date} and ${POSTS[0].date}`);
+  try {
+    await processData(user, file, ARGS.max_requests, nextTimeStamp);
+    await writeToFile(file, POSTS);
+    console.log(`Saved ${POSTS.length} posts from between ${POSTS[POSTS.length - 1].date} and ${POSTS[0].date}`);
+} catch (e) {
+    await writeToFile(file, POSTS);
+    const delay = 20_000 * (1.5 - Math.random());
+    if (POSTS.length) console.log(`Saved ${POSTS.length} posts from between ${POSTS[POSTS.length - 1].date} and ${POSTS[0].date}`);
+    console.log(`Encountered an error fetching posts, likely due to rate limiting. Retrying in ${delay / 1000} seconds.`);
+    if (POSTS.length) console.log('Posts successfully saved. It is safe to stop and restart the program.')
+    POSTS = [];
+    await wait(delay);
+    await main();
+  }
 }
 
 await main();

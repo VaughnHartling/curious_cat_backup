@@ -28,22 +28,20 @@ export async function fetchData(user: string, maxTimestamp?: number): Promise<Da
     try {
         return await res.json();
     } catch(e) {
-        console.log('Failed to load posts. Please try again.\nThis error may appear multiple times.');
+        console.log('Failed to load posts.\nThis error may appear multiple times.');
         throw new Error(e);
     }
 }
 
 export async function getPostData(user: string, id?: string | number): Promise<PostData|undefined> {
     if (!id) return undefined;
-    
+
     const url = `https://curiouscat.live/api/v2.1/profile/single_post?username=${user}&post_id=${id}`;
-    console.log(url);
     const res = await fetch(url);
-    console.log(JSON.stringify(res.body))
     try {
         return await res.json();
     } catch(e) {
-        console.log('Failed to load the timestamp of the oldest saved post. Please try again.\nThis error may appear multiple times.');
+        console.log('Failed to load the timestamp of the oldest saved post.\nThis error may appear multiple times.');
         throw new Error(e);
     }
 }
