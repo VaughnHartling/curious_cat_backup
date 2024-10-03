@@ -1,7 +1,7 @@
 import { parseArgs } from "jsr:@std/cli/parse-args";
 
-import { fetchData, Post } from "./data_fetching.ts";
-import { Entry, toCSV, toEntries } from "./file_management.ts";
+import { fetchData, getPostData, Post } from "./data_fetching.ts";
+import { Entry, getLastId, toCSV, toEntries, writeToFile } from "./file_management.ts";
 
 const ARGS = parseArgs(Deno.args, {
   boolean: ['help'],
@@ -38,7 +38,7 @@ async function processData(user: string, file: string, maxRequests = Infinity, m
   
   const data = await fetchData(user, maxTimestamp);
 
-  if (!data.posts.length) {
+  if (!data?.posts?.length) {
     console.log('No more posts to process.');
     return;
   }
@@ -78,11 +78,10 @@ async function main(): Promise<void> {
     exit(1);
   }
 
+  const id = await getLastId(file);
   await processData(user, file, ARGS.max_requests);
-  console.log(`Saved ${POSTS.length} posts from between ${POSTS[0].date} and ${POSTS[POSTS.length - 1].date}`);
-  const text = toCSV(POSTS)
-  const data = toEntries(text);
-  console.log(data);
+  await writeToFile(file, POSTS);
+  console.log(`Saved ${POSTS.length} posts from between ${POSTS[POSTS.length - 1].date} and ${POSTS[0].date}`);
 }
 
 await main();

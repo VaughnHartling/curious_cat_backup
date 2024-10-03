@@ -21,3 +21,18 @@ export function toEntries(text: string): Entry[] {
     strip: true,
   });
 }
+
+export async function getLastId(file: string): Promise<number | string | undefined> {
+    try {
+        const text = await Deno.readTextFile(file);
+        const entries = toEntries(text);
+        return entries[entries.length - 1].id;
+    } catch (e) {
+        return undefined;
+    }
+}
+
+export async function writeToFile(file: string, entries: Entry[]) {
+  let text = toCSV(entries);
+  await Deno.writeTextFile(file, text);
+}
