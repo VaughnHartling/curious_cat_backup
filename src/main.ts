@@ -68,11 +68,14 @@ async function wait(time: number) {
   })
 }
 
+let user: string;
+let file: string;
+
 async function main(): Promise<void> {
   if (ARGS.help) help();
 
-  const user = ARGS.user || prompt('Username: ');
-  const file = ARGS.file || prompt('File location: ');
+  user = user || ARGS.user || prompt('Username: ');
+  file = file || ARGS.file || prompt('File location: ');
   if (!user) {
     console.log('Please provide a valid username.');
     exit(1);
