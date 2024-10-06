@@ -1,14 +1,18 @@
 # Curious Cat Backup
 
-## Instruction
+## Overview
+
+This script queries the Curious Cat API to download and save a user's posts. These posts are saved in a `.csv` file. The `id`, `question` text, `answer` text, `date`, number of `likes`, and (when applicable) the id of the post the question was in `response_to`, of each post are saved under their corresponding headers.
+
+## Instructions
 
 ### Step 1
 
-Install this repo onto your machine
+Clone or download this repo onto your machine.
 
 ### Step 2
 
-CD into the directory
+CD into the directory where you installed this repo.
 
 ### Step 3
 
@@ -18,7 +22,7 @@ Run the following command:
 ./cc_backup
 ```
 
-Enter the `user` whose posts you would like to save and the destination `file` where you would like to save the posts.
+When prompted, nter the `user` whose posts you would like to save and the destination `file` where you would like to save the posts.
 
 NOTE: If a file does not exist at the path provided, a new file will be generated and formatted automatically.
 
